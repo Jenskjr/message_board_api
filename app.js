@@ -8,6 +8,8 @@ const Joi = require("joi"); // data valæidation
 const cors = require("cors"); // Access
 var bodyParser = require("body-parser");
 const moment = require('moment') // data formats
+const profiles = require("./data/accounts")
+const posts = require("./data/posts")
 
 app.use(cors());
 // configure the app to use bodyParser()
@@ -17,50 +19,6 @@ app.use(
   })
 );
 app.use(bodyParser.json());
-
-const posts = [{
-  id: 1,
-  profileName: "App man",
-  dateTime: "04-03-2019",
-  message: "Velkommen til forumet"
-}];
-
-const profiles = [{
-    id: 1,
-    name: "Rikke",
-    age: 33,
-    image: "rikke23022019",
-    description: "Jeg er ..."
-  },
-  {
-    id: 2,
-    name: "Jens",
-    age: 37,
-    image: "jens23022019",
-    description: "tekst"
-  },
-  {
-    id: 3,
-    name: "Bente",
-    age: 54,
-    image: "bente23022019",
-    description: "Velkommen til min profil ...."
-  },
-  {
-    id: 4,
-    name: "John",
-    age: 50,
-    image: "john23022019",
-    description: "Profiltekst"
-  },
-  {
-    id: 5,
-    name: "Bjarne",
-    age: 70,
-    image: "bjarne23022019",
-    description: "Profiltekst ..."
-  }
-];
 
 // Routes
 
@@ -95,17 +53,31 @@ app.post("/api/post", (req, res) => {
 
 
 
-// profile ---------------------------------------------------
+// Account ---------------------------------------------------
 
-app.get("/api/profile/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === parseInt(req.params.id));
-  if (!profile)
+app.get("/api/account/:id", (req, res) => {
+  const account = profiles.find(c => c.id === parseInt(req.params.id));
+  if (!account)
     return res.sendStatus(404) // 404 = not found 
 
-  // const {error} = validateProfile(req.body);
+  res.send(account);
+});
 
-  // if (error) return res.status(400).send(result.error);
+app.post("/api/account", (req, res) => {
 
+  const exists = profiles.find(c => c.name === req.body.name) === undefined ? false : true;
+  if (exists)
+    return res.sendStatus(400) // 400 = Bad request
+
+  const profile = {
+    id: profiles.length + 1,
+    name: req.body.name,
+    image: "",
+    age: req.body.age,
+    text: req.body.text
+  };
+
+  profiles.push(profile);
   res.send(profile);
 });
 
@@ -135,9 +107,9 @@ app.delete("/api/profiles/:id", (req, res) => {
 });
 
 
-// profiles --------------------------------------------------
+// accounts --------------------------------------------------
 
-app.get("/api/profiles", (req, res) => {
+app.get("/api/accounts", (req, res) => {
   res.send(profiles);
 });
 
@@ -154,26 +126,6 @@ app.get("/api/auth/:username", (req, res) => {
     return res.sendStatus(404); //404 = Not found
   res.send(profile);
 });
-
-app.post("/api/profiles", (req, res) => {
-
-  const exists = profiles.find(c => c.name === req.body.name) === undefined ? false : true;
-  if (exists)
-    return res.sendStatus(400) // 400 = Bad request
-
-  const profile = {
-    id: profiles.length + 1,
-    name: req.body.name,
-    image: "",
-    age: req.body.age,
-    text: req.body.text
-  };
-
-  profiles.push(profile);
-  res.send(profile);
-
-});
-
 
 
 function validateProfile(profile) {
