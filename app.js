@@ -34,11 +34,6 @@ app.get("/api/posts", (req, res) => {
 });
 
 app.post("/api/post", (req, res) => {
-  //const { error } = validateProfile(req.body);
-
-  /*if (error) return;
-  res.status(400).send(result.error);
-  */
 
   const post = {
     id: profiles.length + 1,
@@ -113,6 +108,13 @@ app.get("/api/accounts", (req, res) => {
   res.send(profiles);
 });
 
+app.get("/api/auth/:username", (req, res) => {
+  const profile = profiles.find(c => c.name.toLowerCase() === req.params.username.toLowerCase());
+  if (!profile)
+    return res.sendStatus(404); //404 = Not found
+  res.send(profile);
+});
+
 app.get("/api/profiles/:id", (req, res) => {
   const profile = profiles.find(c => c.id === parseInt(req.params.id));
   if (!profile)
@@ -120,12 +122,6 @@ app.get("/api/profiles/:id", (req, res) => {
   res.send(profile);
 });
 
-app.get("/api/auth/:username", (req, res) => {
-  const profile = profiles.find(c => c.name === req.params.username);
-  if (!profile)
-    return res.sendStatus(404); //404 = Not found
-  res.send(profile);
-});
 
 
 function validateProfile(profile) {
