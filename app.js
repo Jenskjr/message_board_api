@@ -8,8 +8,12 @@ const Joi = require("joi"); // data valæidation
 const cors = require("cors"); // Access
 var bodyParser = require("body-parser");
 const moment = require('moment') // data formats
+
+const uuid = require('uuid');
+// dummy-data
 const profiles = require("./data/accounts")
 const posts = require("./data/posts")
+
 
 app.use(cors());
 // configure the app to use bodyParser()
@@ -51,7 +55,7 @@ app.post("/api/post", (req, res) => {
 // Account ---------------------------------------------------
 
 app.get("/api/account/:id", (req, res) => {
-  const account = profiles.find(c => c.id === parseInt(req.params.id));
+  const account = profiles.find(c => c.id === req.params.id);
   if (!account)
     return res.sendStatus(404) // 404 = not found 
 
@@ -64,8 +68,9 @@ app.post("/api/account", (req, res) => {
   if (exists)
     return res.sendStatus(400) // 400 = Bad request
 
+  let generatedID = profiles.length + 1 + uuid.v4() 
   const profile = {
-    id: profiles.length + 1,
+    id: generatedID.toString(),
     name: req.body.name,
     image: "",
     age: req.body.age,
@@ -77,7 +82,7 @@ app.post("/api/account", (req, res) => {
 });
 
 app.put("/api/profiles/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === parseInt(req.params.id));
+  const profile = profiles.find(c => c.id === req.params.id);
   if (!profile)
     return res.sendStatus(404) // 404 = not found 
 
@@ -92,7 +97,7 @@ app.put("/api/profiles/:id", (req, res) => {
 });
 
 app.delete("/api/profiles/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === parseInt(req.params.id));
+  const profile = profiles.find(c => c.id === req.params.id);
   if (!profile)
     return res.status(404).send("Profile with the give id was not found");
 
@@ -104,6 +109,7 @@ app.delete("/api/profiles/:id", (req, res) => {
 
 // accounts --------------------------------------------------
 
+// all accounts
 app.get("/api/accounts", (req, res) => {
   res.send(profiles);
 });
