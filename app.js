@@ -1,6 +1,5 @@
 // export PORT=5000 // Mac
 // set PORT=5000 // Windows
-// ||
 
 const express = require("express");
 const app = express();
@@ -11,7 +10,7 @@ const moment = require('moment') // data formats
 
 const uuid = require('uuid');
 // dummy-data
-const profiles = require("./data/accounts")
+const accounts = require("./data/accounts")
 const posts = require("./data/posts")
 
 
@@ -31,8 +30,8 @@ app.get("/", (req, res) => {
   res.send("Hello World!!!");
 });
 
-// posts ------------------------------------------------
 
+// posts ------------------------------------------------
 app.get("/api/posts", (req, res) => {
   res.send(posts);
 });
@@ -40,7 +39,7 @@ app.get("/api/posts", (req, res) => {
 app.post("/api/post", (req, res) => {
 
   const post = {
-    id: profiles.length + 1,
+    id: accounts.length + 1,
     profileName: req.body.profileName,
     dateTime: moment().format("llll"),  
     message: req.body.message
@@ -51,58 +50,62 @@ app.post("/api/post", (req, res) => {
 });
 
 
-
-// Account ---------------------------------------------------
-
+// Accounts ---------------------------------------------------
 app.get("/api/account/:id", (req, res) => {
-  const account = profiles.find(c => c.id === req.params.id);
+  const account = accounts.find(c => c.id === req.params.id);
   if (!account)
     return res.sendStatus(404) // 404 = not found 
 
   res.send(account);
 });
 
+// create account
 app.post("/api/account", (req, res) => {
 
-  const exists = profiles.find(c => c.name === req.body.name) === undefined ? false : true;
+  const exists = accounts.find(c => c.name === req.body.name) === undefined ? false : true;
   if (exists)
     return res.sendStatus(400) // 400 = Bad request
 
-  let generatedID = profiles.length + 1 + uuid.v4() 
-  const profile = {
+  let generatedID = accounts.length + 1 + uuid.v4() 
+  const account = {
     id: generatedID.toString(),
     name: req.body.name,
+    password: req.body.password,
     image: "",
     age: req.body.age,
+    occupation: req.body.occupation,
+    region: req.body.region,
     text: req.body.text
   };
 
-  profiles.push(profile);
-  res.send(profile);
+  accounts.push(account);
+  res.send(account);
 });
 
-app.put("/api/profiles/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === req.params.id);
-  if (!profile)
+// update account
+app.put("/api/account/:id", (req, res) => {
+  const account = accounts.find(c => c.id === req.params.id);
+
+  if (!account)
     return res.sendStatus(404) // 404 = not found 
-
-  const {
-    error
-  } = validateProfile(req.body);
-
-  if (error) return res.status(400).send(result.error);
-
-  profile.name = req.body.name;
-  res.send(profile);
+  
+  account.name = req.body.name;
+  account.password = req.body.password;
+  account.age = req.body.age;
+  account.occupation = req.body.occupation;
+  account.region = req.body.region;
+  account.text = req.body.text;
+  
+  res.send(account);
 });
 
-app.delete("/api/profiles/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === req.params.id);
+app.delete("/api/accounts/:id", (req, res) => {
+  const profile = accounts.find(c => c.id === req.params.id);
   if (!profile)
     return res.status(404).send("Profile with the give id was not found");
 
-  const index = profiles.indexOf(profile);
-  profiles.splice(index, 1);
+  const index = accounts.indexOf(profile);
+  accounts.splice(index, 1);
   res.send(profile);
 });
 
@@ -111,38 +114,38 @@ app.delete("/api/profiles/:id", (req, res) => {
 
 // all accounts
 app.get("/api/accounts", (req, res) => {
-  res.send(profiles);
-});
-
-app.get("/api/auth/:username", (req, res) => {
-  const profile = profiles.find(c => c.name.toLowerCase() === req.params.username.toLowerCase());
-  if (!profile)
-    return res.sendStatus(404); //404 = Not found
-  res.send(profile);
-});
-
-app.get("/api/profiles/:id", (req, res) => {
-  const profile = profiles.find(c => c.id === parseInt(req.params.id));
-  if (!profile)
-    return res.sendStatus(404); //404 = Not found
-  res.send(profile);
+  res.send(accounts);
 });
 
 
+app.get("/api/auth/", (req, res) => {
+  const account = accounts.find(x => x.name.toLocaleLowerCase() === req.headers.username.toLowerCase())
 
-function validateProfile(profile) {
-  const schema = {
-    name: Joi.string()
-      .min(3)
-      .required(),
-    age: Joi.required()
-  };
+  // validate login 
+  if (!account)
+    return res.sendStatus(404); // 404 = Not found 
+  if (account.password.toString() === req.headers.token.toString())
+    return res.send(account);    
+});
 
-  const result = Joi.validate(profile, schema);
 
-  return result;
-}
+// app.get("/api/auth/:username", (req, res) => {
+//   const account = accounts.find(c => c.name.toLowerCase() === req.params.username.toLowerCase());
+//   if (!account)
+//     return res.sendStatus(404); //404 = Not found
+//   res.send(account);
+// });
 
+// kan vist slettes
+// app.get("/api/accounts/:id", (req, res) => {
+//   const profile = accounts.find(c => c.id === parseInt(req.params.id));
+//   if (!profile)
+//     return res.sendStatus(404); //404 = Not found
+//   res.send(profile);
+// });
+
+
+// MAC
 //const port = process.env.PORT || 3000; // For Mac
 
 // For Windows
