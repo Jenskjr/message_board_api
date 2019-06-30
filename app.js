@@ -50,15 +50,31 @@ app.post("/api/post", (req, res) => {
 
 
 // Accounts ---------------------------------------------------
+// All accounts
+app.get("/api/accounts", (req, res) => {
+  
+  res.send(accounts);
+});
+
+// One account
 app.get("/api/account/:id", (req, res) => {
   const account = accounts.find(c => c.id === req.params.id);
   if (!account)
     return res.sendStatus(404) // 404 = not found 
 
-  res.send(account);
+  let thisAccount = {
+    id: account.id,
+    name: account.name,
+    age: account.age,
+    occupation: account.occupation,
+    region: account.region,
+    text: account.text 
+  }
+
+  res.send(thisAccount);
 });
 
-// create account
+// Create account
 app.post("/api/account", (req, res) => {
 
   const exists = accounts.find(c => c.name === req.body.name) === undefined ? false : true;
@@ -81,7 +97,7 @@ app.post("/api/account", (req, res) => {
   res.send(account);
 });
 
-// update account
+// Update account
 app.put("/api/account/:id", (req, res) => {
   const account = accounts.find(c => c.id === req.params.id);
 
@@ -108,35 +124,28 @@ app.delete("/api/accounts/:id", (req, res) => {
   res.send(profile);
 });
 
-
-// accounts --------------------------------------------------
-
-// all accounts
-app.get("/api/accounts", (req, res) => {
-  res.send(accounts);
-});
-
-
+// Sign in
 app.get("/api/auth/", (req, res) => {
   const account = accounts.find(x => x.name.toLocaleLowerCase() === req.headers.username.toLowerCase())
   
   // validate login 
   if (!account)
     return res.sendStatus(404); // not found 
-  if (account.password.toString() === req.headers.token.toString())
-    return res.send(account);
+  if (account.password.toString() === req.headers.token.toString()) {
+    let thisAccount = {
+      id: account.id,
+      name: account.name,
+      age: account.age,
+      occupation: account.occupation,
+      region: account.region,
+      text: account.text 
+    }
+
+    return res.send(thisAccount);
+  }
   else 
     return res.sendStatus(401) // bad request    
 });
-
-// app.get("/api/auth/:username", (req, res) => {
-//   const account = accounts.find(c => c.name.toLowerCase() === req.params.username.toLowerCase());
-//   if (!account)
-//     return res.sendStatus(404); //404 = Not found
-//   res.send(account);
-// });
-
-
 
 // MAC
 //const port = process.env.PORT || 3000; // For Mac

@@ -1,6 +1,6 @@
 const accounts = [{
     id: "10d973248-10a5-4525-85eb-74b90ce05158",
-    name: "Rikke",
+    name: "Helle",
     password: 1234,
     age: 33,
     occupation: "Bager",
